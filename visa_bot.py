@@ -14,6 +14,7 @@ URL = os.getenv("URL", "https://appointment.as-visa.com/tr/istanbul-bireysel-bas
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Istanbul")
 START_HOUR = int(os.getenv("START_HOUR", "10"))  # 10 AM
 END_HOUR = int(os.getenv("END_HOUR", "12"))      # 12 PM (noon)
+FORCE_RUN = os.getenv("FORCE_RUN", "false").lower() == "true"
 
 
 async def take_screenshot(url, filename="screenshot.png"):
@@ -44,7 +45,7 @@ async def main():
     tz = pytz.timezone(TIMEZONE)
     now = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
-    if not is_within_schedule():
+    if not FORCE_RUN and not is_within_schedule():
         print(f"💤 [{now}] Outside schedule (10:00–12:00 Istanbul). Skipping.")
         return
 
@@ -66,4 +67,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+    asyncio.run(main())
