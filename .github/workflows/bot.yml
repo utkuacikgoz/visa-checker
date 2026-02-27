@@ -9,7 +9,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 130  # 2h + 10min buffer
+    timeout-minutes: 130 # 2h + 10min buffer
 
     steps:
       - uses: actions/checkout@v4
