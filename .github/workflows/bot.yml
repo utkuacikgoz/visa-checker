@@ -2,13 +2,14 @@ name: Visa Appointment Bot
 
 on:
   schedule:
-    # Every 10 min, 07:00–08:50 UTC = 10:00–11:50 Istanbul (UTC+3)
-    - cron: "*/10 7-8 * * *"
+    # Once daily at 07:00 UTC = 10:00 Istanbul (UTC+3)
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 130  # 2h + 10min buffer
 
     steps:
       - uses: actions/checkout@v4
@@ -40,4 +41,3 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
