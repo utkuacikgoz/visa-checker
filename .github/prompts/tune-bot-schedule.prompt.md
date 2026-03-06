@@ -3,7 +3,7 @@ description: "Tune visa bot scheduling — adjust check interval, start/end hour
 agent: "agent"
 ---
 
-Adjust the visa bot's scheduling configuration in [visa_bot.py](../../visa_bot.py).
+Adjust the visa bot's scheduling configuration in `visa_bot.py`.
 
 The user will specify one or more of:
 
