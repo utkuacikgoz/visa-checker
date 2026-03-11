@@ -2,8 +2,8 @@ import os
 import asyncio
 import random
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from telegram import Bot
 from telegram.error import TelegramError
 from pyppeteer import launch
@@ -26,34 +26,37 @@ async def take_screenshot_and_detect(url, filename="screenshot.png"):
         headless=True,
         args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
     )
-    page = await browser.newPage()
-    await page.setViewport({"width": 1366, "height": 768})
-    await page.goto(url, {"waitUntil": "networkidle2", "timeout": 60000})
-    await page.screenshot({"path": filename, "fullPage": True})
+    try:
+        page = await browser.newPage()
+        await page.setViewport({"width": 1366, "height": 768})
+        await page.goto(url, {"waitUntil": "networkidle2", "timeout": 60000})
 
-    # Detect form elements — when appointments are open the page has input/select fields
-    form_detected = await page.evaluate('''
-        () => {
-            const inputs = document.querySelectorAll('form input, form select, form textarea');
-            return inputs.length > 0;
-        }
-    ''')
+        # Wait for popup overlay to disappear before capturing
+        await asyncio.sleep(2)
 
-    await browser.close()
+        await page.screenshot({"path": filename, "fullPage": True})
+
+        # Detect form elements — when appointments are open the page has input/select fields
+        form_detected = await page.evaluate('''
+            () => {
+                const inputs = document.querySelectorAll('form input, form select, form textarea');
+                return inputs.length > 0;
+            }
+        ''')
+    finally:
+        await browser.close()
     return filename, form_detected
 
 
 def is_within_schedule():
     """Check if current Istanbul time is before END_HOUR."""
-    tz = pytz.timezone(TIMEZONE)
-    now = datetime.now(tz)
+    now = datetime.now(ZoneInfo(TIMEZONE))
     return now.hour < END_HOUR
 
 
 async def send_screenshot(bot):
     """Take a screenshot, detect form availability, and send to Telegram."""
-    tz = pytz.timezone(TIMEZONE)
-    now = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d %H:%M:%S")
 
     try:
         filename, form_detected = await take_screenshot_and_detect(URL)
@@ -92,6 +95,9 @@ async def send_screenshot(bot):
         print(f"❌ [{now}] Telegram error: {e}")
     except Exception as e:
         print(f"❌ [{now}] Unexpected error: {e}")
+    finally:
+        if os.path.exists("screenshot.png"):
+            os.remove("screenshot.png")
     return False
 
 
@@ -101,7 +107,7 @@ async def main():
         return
 
     bot = Bot(BOT_TOKEN)
-    tz = pytz.timezone(TIMEZONE)
+    tz = ZoneInfo(TIMEZONE)
 
     print(f"🚀 Bot started — will screenshot every {INTERVAL_MINUTES} min "
           f"until {END_HOUR:02d}:00 ({TIMEZONE})")
@@ -112,7 +118,7 @@ async def main():
     # Then loop every INTERVAL_MINUTES (±30s jitter) until the schedule window ends
     while is_within_schedule():
         jitter = random.uniform(-30, 30)
-        sleep_secs = INTERVAL_MINUTES * 60 + jitter
+        sleep_secs = max(0, INTERVAL_MINUTES * 60 + jitter)
         print(f"⏳ Sleeping {sleep_secs:.0f}s (~{INTERVAL_MINUTES} min + jitter)...")
         await asyncio.sleep(sleep_secs)
 

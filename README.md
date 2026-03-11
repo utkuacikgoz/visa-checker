@@ -4,21 +4,25 @@ A Telegram bot that automatically takes screenshots of the [AS Visa Istanbul app
 
 ## How it works
 
-- Runs **every 10 minutes** between **10:00 AM and 12:00 PM (noon)** Istanbul time via GitHub Actions cron.
+- Runs **every 2 minutes** between **10:00 AM and 12:00 PM (noon)** Istanbul time via GitHub Actions cron.
 - Each run takes a full-page screenshot of the visa appointment website using a headless Chromium browser.
+- Detects whether the appointment form is open — if so, sends **repeated loud alerts** with your @username mention.
 - Sends the screenshot to the configured Telegram channel with a timestamp.
 - Outside the schedule window, the run exits silently.
 
 ## Environment Variables
 
-| Variable     | Required | Default                                                        | Description                                     |
-| ------------ | -------- | -------------------------------------------------------------- | ----------------------------------------------- |
-| `BOT_TOKEN`  | Yes      | –                                                              | Telegram Bot API token                          |
-| `CHAT_ID`    | Yes      | –                                                              | Telegram chat/channel ID to send screenshots to |
-| `URL`        | No       | `https://appointment.as-visa.com/tr/istanbul-bireysel-basvuru` | Target URL to screenshot                        |
-| `TIMEZONE`   | No       | `Europe/Istanbul`                                              | Timezone for the schedule                       |
-| `START_HOUR` | No       | `10`                                                           | Hour to start (24h format)                      |
-| `END_HOUR`   | No       | `12`                                                           | Hour to stop (24h format)                       |
+| Variable           | Required | Default                                                        | Description                                      |
+| ------------------ | -------- | -------------------------------------------------------------- | ------------------------------------------------ |
+| `BOT_TOKEN`        | Yes      | –                                                              | Telegram Bot API token                           |
+| `CHAT_ID`          | Yes      | –                                                              | Telegram chat/channel ID to send screenshots to  |
+| `URL`              | No       | `https://appointment.as-visa.com/tr/istanbul-bireysel-basvuru` | Target URL to screenshot                         |
+| `TIMEZONE`         | No       | `Europe/Istanbul`                                              | Timezone for the schedule                        |
+| `START_HOUR`       | No       | `10`                                                           | Hour to start (24h format)                       |
+| `END_HOUR`         | No       | `12`                                                           | Hour to stop (24h format)                        |
+| `INTERVAL_MINUTES` | No       | `2`                                                            | Minutes between each check                       |
+| `TELEGRAM_USER`    | No       | –                                                              | Your @username for alert mentions                |
+| `ALERT_REPEAT`     | No       | `3`                                                            | Number of alert messages sent when form detected |
 
 ## Setup
 
