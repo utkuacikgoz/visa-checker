@@ -2,21 +2,21 @@ name: Visa Appointment Bot
 
 on:
   schedule:
-    # Once daily at 07:00 UTC = 10:00 Istanbul (UTC+3)
-    - cron: "0 7 * * *"
+    # Once daily at 05:00 UTC = 08:00 Istanbul (UTC+3)
+    - cron: "0 5 * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 130 # 2h + 10min buffer
+    timeout-minutes: 250 # 4h + 10min buffer
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -41,3 +41,4 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
+          TELEGRAM_USER: ${{ secrets.TELEGRAM_USER }}
